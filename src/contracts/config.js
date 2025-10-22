@@ -1,17 +1,23 @@
-// Contract configuration
-// TODO: Replace with your deployed contract address after deployment
-export const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000"; // Replace after deployment
+// Factory Contract Configuration
+// TODO: Replace with your deployed FACTORY contract address after deployment
+export const FACTORY_ADDRESS = "0x0000000000000000000000000000000000000000"; // Replace after deployment
 
-// TODO: Replace with your contract ABI after compilation
-// You can get this from Remix IDE after compiling TrustlessExpenseSplitter.sol
-export const CONTRACT_ABI = [
-    // This is a placeholder. After you compile your contract in Remix:
+// TODO: Replace with your FACTORY contract ABI after compilation
+export const FACTORY_ABI = [
+    // This is a placeholder. After you compile TrustlessExpenseSplitterFactory.sol in Remix:
     // 1. Go to the "Solidity Compiler" tab
     // 2. Click "Compilation Details"
     // 3. Copy the ABI array and paste it here
-    
-    // For now, I'm including the expected ABI based on your contract
-    // You should replace this with the actual ABI after compilation
+];
+
+// TrustlessExpenseSplitter Contract ABI
+// This is needed to interact with deployed splitter instances
+// TODO: Replace with your SPLITTER contract ABI after compilation
+export const SPLITTER_ABI = [
+    // This is a placeholder. After you compile TrustlessExpenseSplitter.sol in Remix:
+    // 1. Go to the "Solidity Compiler" tab
+    // 2. Click "Compilation Details"
+    // 3. Copy the ABI array and paste it here
 ];
 
 // Network configuration

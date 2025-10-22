@@ -7,11 +7,12 @@ import Web3 from "web3";
 import './App.css';
 import './global.css';
 import Login from "./components/login/Login";
+import Splitters from "./components/splitters/Splitters";
 import Dashboard from "./components/dashboard/Dashboard";
 import Deposit from "./components/deposit/Deposit";
 import Expenses from "./components/expenses/Expenses";
 import History from "./components/history/History";
-import { CONTRACT_ABI, CONTRACT_ADDRESS, EXPECTED_NETWORK } from "./contracts/config";
+import { FACTORY_ABI, FACTORY_ADDRESS, SPLITTER_ABI, EXPECTED_NETWORK } from "./contracts/config";
 
 export default function App() {
     // MetaMask connection states
@@ -21,8 +22,12 @@ export default function App() {
     const [balance, setBalance] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
 
-    // Contract states
-    const [contract, setContract] = useState(null);
+    // Factory contract state
+    const [factoryContract, setFactoryContract] = useState(null);
+    
+    // Active splitter contract states
+    const [activeSplitterAddress, setActiveSplitterAddress] = useState(null);
+    const [splitterContract, setSplitterContract] = useState(null);
     const [memberDeposit, setMemberDeposit] = useState(0);
     const [reservedDeposit, setReservedDeposit] = useState(0);
     const [totalPooledFunds, setTotalPooledFunds] = useState(0);
@@ -47,9 +52,15 @@ export default function App() {
 
     useEffect(() => {
         if (isConnected && address) {
-            initializeContract();
+            initializeFactoryContract();
         }
     }, [isConnected, address]);
+
+    useEffect(() => {
+        if (activeSplitterAddress) {
+            initializeSplitterContract(activeSplitterAddress);
+        }
+    }, [activeSplitterAddress]);
 
     // Check if MetaMask is installed
     const checkMetaMaskAvailable = () => {
@@ -90,7 +101,7 @@ export default function App() {
                     setError(`Please switch to ${EXPECTED_NETWORK.chainName}`);
                 }
 
-                navigate("/dashboard");
+                navigate("/splitters");
             }
         } catch (err) {
             console.error("Error connecting wallet:", err);
@@ -100,28 +111,40 @@ export default function App() {
         }
     };
 
-    // Initialize contract instance
-    const initializeContract = async () => {
+    // Initialize factory contract instance
+    const initializeFactoryContract = async () => {
         try {
-            if (CONTRACT_ADDRESS === "0x0000000000000000000000000000000000000000") {
-                setError("Contract not deployed yet. Please update CONTRACT_ADDRESS in config.js");
+            if (FACTORY_ADDRESS === "0x0000000000000000000000000000000000000000") {
+                setError("Factory contract not deployed yet. Please update FACTORY_ADDRESS in config.js");
                 return;
             }
 
             const web3 = new Web3(window.ethereum);
-            const contractInstance = new web3.eth.Contract(CONTRACT_ABI, CONTRACT_ADDRESS);
-            setContract(contractInstance);
-
-            // Load initial contract data
-            await loadContractData(contractInstance);
+            const factoryInstance = new web3.eth.Contract(FACTORY_ABI, FACTORY_ADDRESS);
+            setFactoryContract(factoryInstance);
         } catch (err) {
-            console.error("Error initializing contract:", err);
-            setError("Failed to initialize contract");
+            console.error("Error initializing factory contract:", err);
+            setError("Failed to initialize factory contract");
         }
     };
 
-    // Load contract data
-    const loadContractData = async (contractInstance) => {
+    // Initialize a specific splitter contract instance
+    const initializeSplitterContract = async (splitterAddress) => {
+        try {
+            const web3 = new Web3(window.ethereum);
+            const splitterInstance = new web3.eth.Contract(SPLITTER_ABI, splitterAddress);
+            setSplitterContract(splitterInstance);
+
+            // Load initial contract data
+            await loadSplitterData(splitterInstance);
+        } catch (err) {
+            console.error("Error initializing splitter contract:", err);
+            setError("Failed to initialize splitter contract");
+        }
+    };
+
+    // Load splitter contract data
+    const loadSplitterData = async (contractInstance) => {
         if (!contractInstance || !address) return;
 
         try {
@@ -137,7 +160,7 @@ export default function App() {
                 setMemberDeposit(ethers.utils.formatEther(deposit));
 
                 // Get reserved deposit
-                const reserved = await contractInstance.methods.reservedDeposits(address).call();
+                const reserved = await contractInstance.methods.getReservedDeposits(address).call();
                 setReservedDeposit(ethers.utils.formatEther(reserved));
 
                 // Get total pooled funds
@@ -153,17 +176,24 @@ export default function App() {
                 setNextExpenseId(parseInt(nextId));
             }
         } catch (err) {
-            console.error("Error loading contract data:", err);
-            setError("Failed to load contract data");
+            console.error("Error loading splitter data:", err);
+            setError("Failed to load splitter data");
         } finally {
             setLoading(false);
         }
     };
 
+    // Handle splitter selection
+    const handleSelectSplitter = (splitterAddress) => {
+        setActiveSplitterAddress(splitterAddress);
+        // Store in localStorage for persistence
+        localStorage.setItem('activeSplitterAddress', splitterAddress);
+    };
+
     // Refresh contract data
     const refreshData = () => {
-        if (contract) {
-            loadContractData(contract);
+        if (splitterContract) {
+            loadSplitterData(splitterContract);
         }
     };
 
@@ -197,7 +227,10 @@ export default function App() {
         setAddress(null);
         setIsConnected(false);
         setIsMember(false);
-        setContract(null);
+        setFactoryContract(null);
+        setSplitterContract(null);
+        setActiveSplitterAddress(null);
+        localStorage.removeItem('activeSplitterAddress');
         navigate("/");
     };
 
@@ -231,6 +264,17 @@ export default function App() {
                     } 
                 />
                 <Route 
+                    path="/splitters" 
+                    element={
+                        <Splitters 
+                            factoryContract={factoryContract}
+                            address={address}
+                            isConnected={isConnected}
+                            onSelectSplitter={handleSelectSplitter}
+                        />
+                    } 
+                />
+                <Route 
                     path="/dashboard" 
                     element={
                         <Dashboard 
@@ -242,6 +286,7 @@ export default function App() {
                             isMember={isMember}
                             allMembers={allMembers}
                             isConnected={isConnected}
+                            activeSplitterAddress={activeSplitterAddress}
                             refreshData={refreshData}
                             disconnectWallet={disconnectWallet}
                         />
@@ -251,7 +296,7 @@ export default function App() {
                     path="/deposit" 
                     element={
                         <Deposit 
-                            contract={contract}
+                            contract={splitterContract}
                             address={address}
                             memberDeposit={memberDeposit}
                             reservedDeposit={reservedDeposit}
@@ -265,7 +310,7 @@ export default function App() {
                     path="/expenses" 
                     element={
                         <Expenses 
-                            contract={contract}
+                            contract={splitterContract}
                             address={address}
                             allMembers={allMembers}
                             nextExpenseId={nextExpenseId}
@@ -279,7 +324,7 @@ export default function App() {
                     path="/history" 
                     element={
                         <History 
-                            contract={contract}
+                            contract={splitterContract}
                             address={address}
                             isConnected={isConnected}
                             isMember={isMember}

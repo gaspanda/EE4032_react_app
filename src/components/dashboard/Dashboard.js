@@ -12,6 +12,7 @@ export default function Dashboard({
     isMember, 
     allMembers, 
     isConnected,
+    activeSplitterAddress,
     refreshData,
     disconnectWallet
 }) {
@@ -23,7 +24,18 @@ export default function Dashboard({
         }
     }, [isConnected, navigate]);
 
+    React.useEffect(() => {
+        if (isConnected && !activeSplitterAddress) {
+            navigate('/splitters');
+        }
+    }, [isConnected, activeSplitterAddress, navigate]);
+
     const availableBalance = (parseFloat(memberDeposit) - parseFloat(reservedDeposit)).toFixed(4);
+    
+    const formatAddress = (addr) => {
+        if (!addr) return '';
+        return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
+    };
 
     return (
         <div>
@@ -32,6 +44,9 @@ export default function Dashboard({
                 <div className="dashboard-header">
                     <h1>Dashboard</h1>
                     <div className="header-actions">
+                        <button onClick={() => navigate('/splitters')} className="button button-secondary">
+                            ← Back to Splitters
+                        </button>
                         <button onClick={refreshData} className="button">
                             🔄 Refresh
                         </button>
@@ -40,6 +55,15 @@ export default function Dashboard({
                         </button>
                     </div>
                 </div>
+
+                {activeSplitterAddress && (
+                    <div className="info-banner">
+                        <strong>Active Splitter:</strong> {formatAddress(activeSplitterAddress)}
+                        <span className="full-address" title={activeSplitterAddress}>
+                            (Click to copy full address)
+                        </span>
+                    </div>
+                )}
 
                 {!isMember && (
                     <div className="error-message">

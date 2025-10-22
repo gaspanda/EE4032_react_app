@@ -1,10 +1,88 @@
-# Getting Started with Create React App
+# TrustlessExpenseSplitter DApp
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A decentralized application for trustless expense splitting using Ethereum smart contracts with a **factory pattern** for creating multiple independent expense groups.
+
+## 🌟 Features
+
+- **Factory Pattern**: Create unlimited expense splitter groups from a single deployed factory
+- **Multi-Group Management**: Users can be members of multiple splitter groups
+- **MetaMask Integration**: Secure wallet connection
+- **Deposit Management**: Add and withdraw ETH with reserved funds protection
+- **Expense Proposals**: Propose shared expenses with custom participant splits
+- **Multi-Party Approval**: Expenses require approval from all participants
+- **Reserved Deposits**: Funds are reserved upon approval to prevent race conditions
+- **Transaction History**: View all group activities
+- **Member Dashboard**: Real-time balance and group information
+
+## 🏗️ Architecture
+
+### Smart Contracts
+
+1. **TrustlessExpenseSplitterFactory.sol** (Deploy this)
+   - Creates new splitter instances
+   - Tracks all splitters
+   - User splitter lookup
+
+2. **TrustlessExpenseSplitter.sol** (Auto-deployed by factory)
+   - Manages one group's expenses
+   - Independent instance per group
+
+### React Application
+
+- React 19.x
+- React Router 7.x for navigation
+- Web3.js for blockchain interaction
+- ethers.js for utilities
+- Modular component architecture
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 16+ installed
+- MetaMask browser extension
+- Sepolia testnet ETH
+
+### Installation
+
+```bash
+cd react_test_proj
+npm install
+```
+
+### Configuration
+
+1. Deploy `TrustlessExpenseSplitterFactory.sol` to testnet (see FACTORY_PATTERN_GUIDE.md)
+2. Update `src/contracts/config.js`:
+   - Set `FACTORY_ADDRESS` to your deployed factory address
+   - Paste `FACTORY_ABI` from compilation
+   - Paste `SPLITTER_ABI` from compilation
+
+### Run Development Server
+
+```bash
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+## 📖 Documentation
+
+- **[FACTORY_PATTERN_GUIDE.md](FACTORY_PATTERN_GUIDE.md)** - Complete factory pattern documentation
+- **[SETUP_GUIDE.md](SETUP_GUIDE.md)** - Detailed setup instructions
+- **[HOW_TO_GET_ABI.md](HOW_TO_GET_ABI.md)** - ABI extraction guide
+- **[TODO.md](TODO.md)** - Development roadmap
+
+## 🎯 User Workflow
+
+1. **Connect MetaMask** → Login with your wallet
+2. **View Splitters** → See all your expense groups
+3. **Create Splitter** → Start a new group with members
+4. **Select Splitter** → Choose which group to manage
+5. **Manage Expenses** → Deposit, propose, approve, execute
+6. **Withdraw Funds** → Get your remaining balance back
 
 ## Available Scripts
-
-In the project directory, you can run:
 
 ### `npm start`
 
@@ -29,15 +107,46 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
+## 🔐 Security Features
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Reserved deposits prevent double-spending
+- Multi-party approval required
+- Member-only access control
+- Factory enforces creator inclusion
+- No factory address as member
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🌐 Deployment
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### GitHub Pages (Recommended)
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+npm run build
+# Deploy build folder to GitHub Pages
+```
+
+### Other Platforms
+
+The build folder can be deployed to any static hosting:
+- Vercel
+- Netlify
+- AWS S3
+- IPFS
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 19, React Router 7
+- **Blockchain**: Web3.js 4.x, ethers.js 5.x
+- **Styling**: Custom CSS
+- **Smart Contracts**: Solidity 0.8.x
+- **Network**: Ethereum Sepolia Testnet
+
+## 📝 License
+
+MIT License - See LICENSE file for details
+
+## 🤝 Contributing
+
+Contributions welcome! Please open an issue or PR.
 
 ## Learn More
 

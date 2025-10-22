@@ -15,6 +15,8 @@ export const GlobalToolBar = () => {
         <div className="global-toolbar">
             <Link to="/login">Login</Link>
             &nbsp;|&nbsp;
+            <Link to="/splitters">My Splitters</Link>
+            &nbsp;|&nbsp;
             <Link to="/dashboard">Dashboard</Link>
             &nbsp;|&nbsp;
             <Link to="/deposit">Deposit</Link>
