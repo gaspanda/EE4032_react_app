@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalToolBar } from '../../global';
+import { ethers } from "ethers";
 import './Splitters.css';
 
 export default function Splitters({ 
@@ -104,7 +105,7 @@ export default function Splitters({
 
             // Validate addresses
             for (const addr of addresses) {
-                if (!window.ethereum.isAddress || !/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+                if (!ethers.utils.isAddress(addr)) {
                     setError(`Invalid Ethereum address: ${addr}`);
                     return;
                 }
