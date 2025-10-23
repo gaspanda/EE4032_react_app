@@ -799,7 +799,7 @@ export const SUPPORTED_NETWORKS = {
     SEPOLIA: {
         chainId: '0xaa36a7',
         chainName: 'Sepolia Test Network',
-        rpcUrls: ['https://sepolia.infura.io/'],
+        rpcUrls: ['https://sepolia.infura.io'],
         blockExplorerUrls: ['https://sepolia.etherscan.io/']
     },
     GOERLI: {

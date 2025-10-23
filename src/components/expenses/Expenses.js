@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ethers } from 'ethers';
 import { GlobalToolBar } from '../../global';
 import './Expenses.css';
 
@@ -48,7 +49,7 @@ export default function Expenses({
             // Load all expenses from ID 1 to nextExpenseId
             for (let i = 1; i < nextExpenseId; i++) {
                 try {
-                    const expense = await contract.methods.getExpenseDetails(i).call();
+                    const expense = await contract.getExpenseDetails(i);
                     
                     // Check if user is a participant
                     const isParticipant = expense.participants.some(
@@ -56,12 +57,12 @@ export default function Expenses({
                     );
                     
                     // Get user's approval status
-                    const hasApproved = await contract.methods.hasApproved(i, address).call();
+                    const hasApproved = await contract.hasApproved(i, address);
                     
                     // Get user's share if participant
                     let userShare = '0';
                     if (isParticipant) {
-                        userShare = await contract.methods.getParticipantShare(i, address).call();
+                        userShare = await contract.getParticipantShare(i, address);
                     }
 
                     expensesList.push({
@@ -101,7 +102,7 @@ export default function Expenses({
                 throw new Error("Contract not initialized");
             }
 
-            if (!recipient || !window.web3.utils.isAddress(recipient)) {
+            if (!recipient || !ethers.utils.isAddress(recipient)) {
                 throw new Error("Invalid recipient address");
             }
 
@@ -116,29 +117,27 @@ export default function Expenses({
             // Prepare participants and shares arrays
             const participantsArray = selectedParticipants;
             const sharesArray = participantsArray.map(p => 
-                window.web3.utils.toWei(participantShares[p] || '0', 'ether')
+                ethers.utils.parseEther(participantShares[p] || '0')
             );
 
-            const totalAmountWei = window.web3.utils.toWei(totalAmount, 'ether');
+            const totalAmountWei = ethers.utils.parseEther(totalAmount);
 
             // Verify shares sum to total
             const sharesSum = sharesArray.reduce((a, b) => 
-                window.web3.utils.toBN(a).add(window.web3.utils.toBN(b)).toString(), '0'
+                ethers.BigNumber.from(a).add(ethers.BigNumber.from(b)), ethers.BigNumber.from(0)
             );
 
-            if (sharesSum !== totalAmountWei) {
+            if (!sharesSum.eq(totalAmountWei)) {
                 throw new Error("Participant shares must sum to total amount");
             }
 
-            await contract.methods.proposeExpense(
+            const tx = await contract.proposeExpense(
                 recipient,
                 totalAmountWei,
                 participantsArray,
                 sharesArray
-            ).send({
-                from: address,
-                gas: 500000
-            });
+            );
+            await tx.wait();
 
             setSuccess("Expense proposed successfully!");
             
@@ -173,10 +172,8 @@ export default function Expenses({
                 throw new Error("Contract not initialized");
             }
 
-            await contract.methods.approveExpense(expenseId).send({
-                from: address,
-                gas: 500000
-            });
+            const tx = await contract.approveExpense(expenseId);
+            await tx.wait();
 
             setSuccess(`Expense #${expenseId} approved successfully!`);
             
@@ -203,10 +200,8 @@ export default function Expenses({
                 throw new Error("Contract not initialized");
             }
 
-            await contract.methods._executeExpense(expenseId).send({
-                from: address,
-                gas: 500000
-            });
+            const tx = await contract._executeExpense(expenseId);
+            await tx.wait();
 
             setSuccess(`Expense #${expenseId} executed successfully!`);
             
@@ -315,7 +310,7 @@ export default function Expenses({
                                     </div>
                                     <div className="detail-row">
                                         <span>Total Amount:</span>
-                                        <span className="amount">{window.web3.utils.fromWei(expense.amount, 'ether')} ETH</span>
+                                        <span className="amount">{ethers.utils.formatEther(expense.amount)} ETH</span>
                                     </div>
                                     <div className="detail-row">
                                         <span>Approvals:</span>
@@ -325,7 +320,7 @@ export default function Expenses({
                                     {expense.isParticipant && (
                                         <div className="detail-row highlight">
                                             <span>Your Share:</span>
-                                            <span className="amount">{window.web3.utils.fromWei(expense.userShare, 'ether')} ETH</span>
+                                            <span className="amount">{ethers.utils.formatEther(expense.userShare)} ETH</span>
                                         </div>
                                     )}
                                 </div>

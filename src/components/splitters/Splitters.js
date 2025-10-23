@@ -39,13 +39,13 @@ export default function Splitters({
             setLoading(true);
             setError(null);
 
-            const splitters = await factoryContract.methods.getUserSplitters(address).call();
+            const splitters = await factoryContract.getUserSplitters(address);
             
             // Load metadata for each splitter
             const splittersWithInfo = await Promise.all(
                 splitters.map(async (splitterAddress) => {
                     try {
-                        const info = await factoryContract.methods.getSplitterInfo(splitterAddress).call();
+                        const info = await factoryContract.getSplitterInfo(splitterAddress);
                         return {
                             address: splitterAddress,
                             creator: info.creator || info[0],
@@ -111,10 +111,9 @@ export default function Splitters({
                 }
             }
 
-            // Create the splitter
-            const receipt = await factoryContract.methods
-                .createSplitter(addresses)
-                .send({ from: address });
+            // Create the splitter (ethers.js syntax)
+            const tx = await factoryContract.createSplitter(addresses);
+            const receipt = await tx.wait();
 
             console.log("Splitter created:", receipt);
             

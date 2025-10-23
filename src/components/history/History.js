@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ethers } from 'ethers';
 import { GlobalToolBar } from '../../global';
 import './History.css';
 
@@ -29,12 +30,12 @@ export default function History({ contract, address, isConnected, isMember }) {
             const expensesList = [];
             
             // Get next expense ID
-            const nextId = await contract.methods.getNextExpenseId().call();
+            const nextId = await contract.getNextExpenseId();
 
             // Load all expenses
             for (let i = 1; i < nextId; i++) {
                 try {
-                    const expense = await contract.methods.getExpenseDetails(i).call();
+                    const expense = await contract.getExpenseDetails(i);
                     
                     // Check if user is a participant
                     const isParticipant = expense.participants.some(
@@ -42,12 +43,12 @@ export default function History({ contract, address, isConnected, isMember }) {
                     );
                     
                     // Get user's approval status
-                    const hasApproved = await contract.methods.hasApproved(i, address).call();
+                    const hasApproved = await contract.hasApproved(i, address);
                     
                     // Get user's share if participant
                     let userShare = '0';
                     if (isParticipant) {
-                        userShare = await contract.methods.getParticipantShare(i, address).call();
+                        userShare = await contract.getParticipantShare(i, address);
                     }
 
                     expensesList.push({
@@ -98,11 +99,11 @@ export default function History({ contract, address, isConnected, isMember }) {
 
         const totalAmount = expenses
             .filter(e => e.executed)
-            .reduce((sum, e) => sum + parseFloat(window.web3.utils.fromWei(e.amount, 'ether')), 0);
+            .reduce((sum, e) => sum + parseFloat(ethers.utils.formatEther(e.amount)), 0);
 
         const myTotalPaid = expenses
             .filter(e => e.executed && e.isParticipant)
-            .reduce((sum, e) => sum + parseFloat(window.web3.utils.fromWei(e.userShare, 'ether')), 0);
+            .reduce((sum, e) => sum + parseFloat(ethers.utils.formatEther(e.userShare)), 0);
 
         return { total, executed, pending, myExpenses, totalAmount, myTotalPaid };
     };
@@ -217,14 +218,14 @@ export default function History({ contract, address, isConnected, isMember }) {
                                             {expense.recipient.slice(0, 6)}...{expense.recipient.slice(-4)}
                                         </td>
                                         <td className="amount-cell">
-                                            {window.web3.utils.fromWei(expense.amount, 'ether')} ETH
+                                            {ethers.utils.formatEther(expense.amount)} ETH
                                         </td>
                                         <td>
                                             {expense.approvalCount}/{expense.requiredApprovals}
                                         </td>
                                         <td className="amount-cell">
                                             {expense.isParticipant 
-                                                ? `${window.web3.utils.fromWei(expense.userShare, 'ether')} ETH`
+                                                ? `${ethers.utils.formatEther(expense.userShare)} ETH`
                                                 : '-'
                                             }
                                         </td>

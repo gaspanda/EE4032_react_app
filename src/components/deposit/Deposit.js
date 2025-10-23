@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalToolBar } from '../../global';
+import { ethers } from "ethers";
 import './Deposit.css';
 
 export default function Deposit({ 
@@ -39,13 +40,12 @@ export default function Deposit({
                 throw new Error("Please enter a valid amount");
             }
 
-            const amountInWei = window.web3.utils.toWei(depositAmount, 'ether');
+            const amountInWei = ethers.utils.parseEther(depositAmount);
 
-            await contract.methods.deposit().send({
-                from: address,
-                value: amountInWei,
-                gas: 300000
+            const tx = await contract.deposit({
+                value: amountInWei
             });
+            await tx.wait(); // Wait for confirmation
 
             setSuccess(`Successfully deposited ${depositAmount} ETH!`);
             setDepositAmount('');
@@ -57,7 +57,13 @@ export default function Deposit({
 
         } catch (err) {
             console.error("Deposit error:", err);
-            setError(err.message || "Failed to deposit funds");
+            let errorMsg = "Failed to deposit funds";
+            if (typeof err === "string") {
+                errorMsg = err;
+            } else if (err && typeof err.message === "string") {
+                errorMsg = err.message;
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }
@@ -79,21 +85,25 @@ export default function Deposit({
                 throw new Error("No funds available to withdraw. All your deposits are reserved for pending expenses.");
             }
 
-            await contract.methods.withdrawMoney().send({
-                from: address,
-                gas: 300000
-            });
+            // FIXED: Use ethers.js syntax
+            const tx = await contract.withdrawMoney();
+            await tx.wait(); // Wait for confirmation
 
             setSuccess(`Successfully withdrew ${availableToWithdraw.toFixed(4)} ETH!`);
             
-            // Refresh data after 2 seconds
             setTimeout(() => {
                 refreshData();
             }, 2000);
 
         } catch (err) {
             console.error("Withdraw error:", err);
-            setError(err.message || "Failed to withdraw funds");
+            let errorMsg = "Failed to withdraw funds";
+            if (typeof err === "string") {
+                errorMsg = err;
+            } else if (err && typeof err.message === "string") {
+                errorMsg = err.message;
+            }
+            setError(errorMsg);
         } finally {
             setLoading(false);
         }

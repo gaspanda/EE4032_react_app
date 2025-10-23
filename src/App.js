@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import Web3 from "web3";
 
 import './App.css';
 import './global.css';
@@ -83,6 +82,44 @@ export default function App() {
             }
 
             const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+            // Check network BEFORE requesting accounts
+            const networkInfo = await provider.getNetwork();
+            const expectedChainId = parseInt(EXPECTED_NETWORK.chainId, 16);
+            
+            if (networkInfo.chainId !== expectedChainId) {
+                // Try to switch to Sepolia
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: EXPECTED_NETWORK.chainId }],
+                    });
+                } catch (switchError) {
+                    // If network not added, prompt to add it
+                    if (switchError.code === 4902) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: EXPECTED_NETWORK.chainId,
+                                    chainName: EXPECTED_NETWORK.chainName,
+                                    rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                    blockExplorerUrls: ['https://sepolia.etherscan.io/'],
+                                }],
+                            });
+                        } catch (addError) {
+                            setError(`Please add ${EXPECTED_NETWORK.chainName} to MetaMask`);
+                            setLoading(false);
+                            return;
+                        }
+                    } else {
+                        setError(`Please switch to ${EXPECTED_NETWORK.chainName} in MetaMask`);
+                        setLoading(false);
+                        return;
+                    }
+                }
+            }
+
             const accounts = await provider.send("eth_requestAccounts", []);
             
             if (accounts.length > 0) {
@@ -119,8 +156,9 @@ export default function App() {
                 return;
             }
 
-            const web3 = new Web3(window.ethereum);
-            const factoryInstance = new web3.eth.Contract(FACTORY_ABI, FACTORY_ADDRESS);
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const factoryInstance = new ethers.Contract(FACTORY_ADDRESS, FACTORY_ABI, signer);
             setFactoryContract(factoryInstance);
         } catch (err) {
             console.error("Error initializing factory contract:", err);
@@ -131,8 +169,9 @@ export default function App() {
     // Initialize a specific splitter contract instance
     const initializeSplitterContract = async (splitterAddress) => {
         try {
-            const web3 = new Web3(window.ethereum);
-            const splitterInstance = new web3.eth.Contract(SPLITTER_ABI, splitterAddress);
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const splitterInstance = new ethers.Contract(splitterAddress, SPLITTER_ABI, signer);
             setSplitterContract(splitterInstance);
 
             // Load initial contract data
@@ -150,30 +189,30 @@ export default function App() {
         try {
             setLoading(true);
 
-            // Check if user is a member
-            const memberStatus = await contractInstance.methods.isMember(address).call();
+            // Check if user is a member (ethers.js syntax)
+            const memberStatus = await contractInstance.isMember(address);
             setIsMember(memberStatus);
 
             if (memberStatus) {
                 // Get member's deposit
-                const deposit = await contractInstance.methods.getMemberBalance(address).call();
+                const deposit = await contractInstance.getMemberBalance(address);
                 setMemberDeposit(ethers.utils.formatEther(deposit));
 
                 // Get reserved deposit
-                const reserved = await contractInstance.methods.getReservedDeposits(address).call();
+                const reserved = await contractInstance.getReservedDeposits(address);
                 setReservedDeposit(ethers.utils.formatEther(reserved));
 
                 // Get total pooled funds
-                const total = await contractInstance.methods.totalPooledFunds().call();
+                const total = await contractInstance.totalPooledFunds();
                 setTotalPooledFunds(ethers.utils.formatEther(total));
 
                 // Get all members
-                const members = await contractInstance.methods.getAllMembers().call();
+                const members = await contractInstance.getAllMembers();
                 setAllMembers(members);
 
                 // Get next expense ID
-                const nextId = await contractInstance.methods.getNextExpenseId().call();
-                setNextExpenseId(parseInt(nextId));
+                const nextId = await contractInstance.getNextExpenseId();
+                setNextExpenseId(parseInt(nextId.toString()));
             }
         } catch (err) {
             console.error("Error loading splitter data:", err);
