@@ -1,46 +1,53 @@
+/* Modern Crypto Login Styles */
 .login-container {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #10131a 0%, #1a1f2b 100%);
     padding: 20px;
 }
-
 .login-card {
-    background: white;
-    border-radius: 15px;
+    background: var(--color-bg-glass);
+    border-radius: var(--border-radius);
     padding: 40px;
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--box-shadow);
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
 }
-
 .login-card h1 {
-    color: #1a1a2e;
+    color: var(--color-primary);
     margin-bottom: 10px;
     text-align: center;
-    font-size: 28px;
+    font-size: 2rem;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 16px rgba(0,225,192,0.12);
 }
-
 .subtitle {
     text-align: center;
-    color: #666;
+    color: var(--color-text-muted);
     margin-bottom: 30px;
     font-size: 16px;
 }
-
 .connect-section {
     text-align: center;
     margin: 30px 0;
 }
-
 .button-primary {
-    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
     font-size: 18px;
-    padding: 15px 40px;
-    width: 100%;
-    margin-bottom: 20px;
+    color: #fff;
+    border-radius: var(--border-radius);
+    font-weight: 700;
+    box-shadow: var(--box-shadow);
+    border: none;
+    transition: background var(--transition), transform var(--transition);
+}
+.button-primary:hover {
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .address {
@@ -58,7 +65,7 @@
 }
 
 .features h3 {
-    color: #1a1a2e;
+    color: var(--color-primary);
     margin-bottom: 15px;
 }
 
@@ -71,13 +78,13 @@
     padding: 10px 0;
     padding-left: 25px;
     position: relative;
-    color: #555;
+    color: var(--color-text);
 }
 
 .features li:before {
     content: "✓";
     position: absolute;
     left: 0;
-    color: #0f3460;
+    color: var(--color-accent);
     font-weight: bold;
 }

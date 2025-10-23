@@ -1,10 +1,10 @@
+/* Modern Crypto Expenses Styles */
 .tabs {
     display: flex;
     gap: 10px;
     margin: 20px 0;
-    border-bottom: 2px solid #eee;
+    border-bottom: 2px solid var(--color-secondary);
 }
-
 .tab {
     padding: 12px 24px;
     border: none;
@@ -12,31 +12,34 @@
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    color: #666;
+    color: var(--color-text-muted);
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
 }
-
 .tab:hover {
-    color: #0f3460;
+    color: var(--color-primary);
 }
-
 .tab.active {
-    color: #0f3460;
-    border-bottom-color: #0f3460;
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
 }
-
 .expenses-list {
     margin-top: 20px;
 }
-
 .expense-card {
-    background: white;
-    border-radius: 10px;
+    background: var(--color-bg-glass);
+    border-radius: var(--border-radius);
     padding: 25px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
+    box-shadow: var(--box-shadow);
+    color: var(--color-text);
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: box-shadow var(--transition), transform var(--transition);
+    backdrop-filter: blur(10px);
+}
+.expense-card:hover {
+    box-shadow: 0 8px 32px 0 rgba(0,225,192,0.10);
+    transform: translateY(-2px) scale(1.02);
 }
 
 .expense-card:hover {
@@ -54,7 +57,7 @@
 
 .expense-header h3 {
     margin: 0;
-    color: #1a1a2e;
+    color: var(--color-text);
 }
 
 .expense-details {
@@ -73,23 +76,23 @@
 }
 
 .detail-row.highlight {
-    background: #f8f9fa;
+    background: linear-gradient(90deg, rgba(0,225,192,0.18) 0%, rgba(95,95,255,0.18) 100%), var(--color-bg-glass);
+    color: var(--color-text);
     padding: 12px;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     font-weight: 600;
     border-bottom: none;
     margin-top: 10px;
 }
-
 .address-short {
     font-family: monospace;
-    color: #666;
+    color: var(--color-text);
     font-size: 14px;
 }
 
 .amount {
     font-weight: 600;
-    color: #0f3460;
+    color: var(--color-text);
     font-family: monospace;
 }
 
@@ -122,7 +125,7 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #333;
+    color: var(--color-primary);
 }
 
 .participants-selector {
@@ -137,8 +140,9 @@
     align-items: center;
     gap: 8px;
     padding: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
+    background: linear-gradient(100deg, rgba(0,225,192,0.28) 0%, rgba(95,95,255,0.22) 60%, rgba(233,69,96,0.18) 100%), var(--color-bg-glass);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
 }
 
 .participant-item input[type="checkbox"] {

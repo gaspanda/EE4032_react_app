@@ -1,3 +1,4 @@
+/* Modern Crypto Deposit Styles */
 .deposit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -7,36 +8,51 @@
 
 .deposit-form {
     margin: 20px 0;
+    background: var(--color-bg-glass);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2em 2em 1.5em 2em;
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
 }
 
 .form-group {
     margin-bottom: 20px;
 }
-
 .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #333;
+    color: var(--color-primary);
+    letter-spacing: 0.01em;
 }
 
 .button-primary {
     width: 100%;
-    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
     font-size: 16px;
     padding: 15px;
+    border-radius: var(--border-radius);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: var(--box-shadow);
+    border: none;
+    transition: background var(--transition), transform var(--transition);
+}
+.button-primary:hover {
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .quick-amounts {
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid rgba(255,255,255,0.08);
 }
-
 .quick-amounts p {
     margin-bottom: 10px;
     font-weight: 600;
-    color: #555;
+    color: var(--color-accent);
 }
 
 .quick-buttons {
@@ -47,18 +63,20 @@
 .button-quick {
     flex: 1;
     padding: 10px;
-    border: 2px solid #0f3460;
-    background: white;
-    color: #0f3460;
-    border-radius: 5px;
+    border: 2px solid var(--color-accent);
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: #fff;
+    border-radius: var(--border-radius);
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s ease;
+    box-shadow: var(--box-shadow);
+    transition: background var(--transition), color var(--transition);
 }
 
 .button-quick:hover {
-    background: #0f3460;
-    color: white;
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    color: #fff;
+    /* No transform, so it won't expand on hover */
 }
 
 .button-quick:disabled {
@@ -67,12 +85,14 @@
 }
 
 .balance-info {
-    background: #f8f9fa;
+    background: var(--color-bg-glass);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
     padding: 20px;
-    border-radius: 8px;
     margin: 20px 0;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(8px);
 }
-
 .balance-row {
     display: flex;
     justify-content: space-between;

@@ -1,3 +1,121 @@
+/* existing global styles */
+/* Modern Crypto-Inspired Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    --color-bg: #10131a;
+    --color-bg-glass: rgba(16, 19, 26, 0.7);
+    --color-primary: #00e1c0;
+    --color-secondary: #1a1f2b;
+    --color-accent: #5f5fff;
+    --color-danger: #ff4b4b;
+    --color-success: #00e1c0;
+    --color-warning: #ffb800;
+    --color-text: #f3f6fa;
+    --color-text-muted: #a0aec0;
+    --border-radius: 16px;
+    --box-shadow: 0 4px 32px 0 rgba(0,0,0,0.25);
+    --transition: 0.2s cubic-bezier(.4,0,.2,1);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #10131a 0%, #1a1f2b 100%);
+    color: var(--color-text);
+    min-height: 100vh;
+    letter-spacing: 0.01em;
+}
+
+body {
+    background: linear-gradient(120deg, #10131a 0%, #1a1f2b 100%);
+    min-height: 100vh;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition);
+}
+a:hover {
+    color: var(--color-accent);
+}
+
+button, .btn {
+    font-family: inherit;
+    font-weight: 600;
+    border: none;
+    border-radius: var(--border-radius);
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: #fff;
+    padding: 0.75em 2em;
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+    transition: background var(--transition), transform var(--transition);
+}
+button:hover, .btn:hover {
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    transform: translateY(-2px) scale(1.03);
+}
+
+input, select, textarea {
+    background: var(--color-bg-glass);
+    color: var(--color-text);
+    border: 1px solid var(--color-secondary);
+    border-radius: var(--border-radius);
+    padding: 0.75em 1em;
+    margin-bottom: 1em;
+    font-size: 1em;
+    transition: border var(--transition), box-shadow var(--transition);
+    box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
+}
+input:focus, select:focus, textarea:focus {
+    border: 1.5px solid var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.card, .glass {
+    background: var(--color-bg-glass);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2em;
+    margin: 1.5em 0;
+    backdrop-filter: blur(12px) saturate(120%);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.crypto-gradient {
+    background: linear-gradient(120deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: #fff;
+    border-radius: var(--border-radius);
+    padding: 1em 2em;
+    box-shadow: var(--box-shadow);
+}
+
+.text-muted {
+    color: var(--color-text-muted);
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background: var(--color-secondary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 8px;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 .global-toolbar {
     position: fixed;
     top: 0;
@@ -29,11 +147,14 @@
 }
 
 .card {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(0,225,192,0.12) 0%, rgba(95,95,255,0.10) 100%), var(--color-bg-glass);
+    color: var(--color-text);
+    border-radius: var(--border-radius);
+    padding: 2em 1.5em;
+    margin: 1.5em 0;
+    box-shadow: var(--box-shadow);
+    backdrop-filter: blur(12px) saturate(120%);
+    border: 1px solid rgba(255,255,255,0.08);
 }
 
 .button {
@@ -70,7 +191,7 @@
 }
 
 .input-field {
-    width: 100%;
+    width: 95%;
     padding: 12px;
     margin: 10px 0;
     border: 2px solid #ddd;
