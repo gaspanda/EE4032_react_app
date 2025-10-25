@@ -136,6 +136,12 @@ export default function Dashboard({
 
                         <div className="action-buttons">
                             <button 
+                                onClick={() => navigate('/expenses?tab=propose')} 
+                                className="button action-button primary-action"
+                            >
+                                ➕ Propose Expense
+                            </button>
+                            <button 
                                 onClick={() => navigate('/deposit')} 
                                 className="button action-button"
                             >

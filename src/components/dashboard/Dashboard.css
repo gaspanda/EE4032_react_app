@@ -184,3 +184,16 @@
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
+
+.action-button.primary-action {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    font-weight: 700;
+    border: 2px solid var(--color-primary);
+    box-shadow: 0 6px 20px rgba(0, 225, 192, 0.3);
+}
+
+.action-button.primary-action:hover {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 225, 192, 0.4);
+}

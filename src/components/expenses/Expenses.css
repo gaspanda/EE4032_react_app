@@ -160,9 +160,40 @@
 
 .shares-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    gap: 15px;
     margin-bottom: 15px;
+}
+
+.button-quick {
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-primary) 100%);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition);
+    box-shadow: 0 2px 8px rgba(95, 95, 255, 0.2);
+    white-space: nowrap;
+    display: inline-block;
+    text-align: center;
+    width: auto;
+    max-width: fit-content;
+    flex-shrink: 0;
+}
+
+.button-quick:hover {
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    box-shadow: 0 4px 12px rgba(95, 95, 255, 0.3);
+    transform: none; /* Override global transform to prevent expansion */
+}
+
+.button-quick:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .share-input {

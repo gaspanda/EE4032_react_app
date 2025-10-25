@@ -34,6 +34,15 @@ export default function Expenses({
     }, [isConnected, navigate]);
 
     useEffect(() => {
+        // Check URL parameters to set initial tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam === 'propose') {
+            setActiveTab('propose');
+        }
+    }, []);
+
+    useEffect(() => {
         if (contract && isMember) {
             loadExpenses();
         }
