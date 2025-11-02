@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GlobalToolBar } from '../../global';
 import { ethers } from "ethers";
+import { SPLITTER_ABI } from '../../contracts/config';
 import './Splitters.css';
 
 export default function Splitters({ 
@@ -19,6 +20,14 @@ export default function Splitters({
     // Create splitter form states
     const [memberAddresses, setMemberAddresses] = useState('');
     const [creating, setCreating] = useState(false);
+    
+    // Editable name states
+    const [editingName, setEditingName] = useState({});
+    const [splitterNames, setSplitterNames] = useState({});
+    
+    // Final settlement states
+    const [settlementLoading, setSettlementLoading] = useState({});
+    const [showSettlementConfirm, setShowSettlementConfirm] = useState({});
 
     useEffect(() => {
         if (!isConnected) {
@@ -70,6 +79,89 @@ export default function Splitters({
             setError("Failed to load your splitters");
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Load saved splitter names from localStorage
+    useEffect(() => {
+        const savedNames = localStorage.getItem('splitterNames');
+        if (savedNames) {
+            setSplitterNames(JSON.parse(savedNames));
+        }
+    }, []);
+
+    // Save splitter names to localStorage
+    const saveSplitterNames = (names) => {
+        localStorage.setItem('splitterNames', JSON.stringify(names));
+        setSplitterNames(names);
+    };
+
+    // Handle name editing
+    const handleNameEdit = (splitterAddress, newName) => {
+        const updatedNames = {
+            ...splitterNames,
+            [splitterAddress]: newName
+        };
+        saveSplitterNames(updatedNames);
+        setEditingName({ ...editingName, [splitterAddress]: false });
+    };
+
+    // Handle final settlement
+    const handleFinalSettlement = async (splitterAddress) => {
+        try {
+            setSettlementLoading({ ...settlementLoading, [splitterAddress]: true });
+            setError(null);
+
+            // Check if we have a valid provider
+            if (!window.ethereum) {
+                throw new Error("No Web3 provider found. Please install MetaMask.");
+            }
+
+            // Get the splitter contract instance
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            
+            // Use the proper SPLITTER_ABI instead of manual ABI
+            const splitterContract = new ethers.Contract(
+                splitterAddress,
+                SPLITTER_ABI,
+                signer
+            );
+
+            // Verify the contract is valid by calling a view function
+            try {
+                await splitterContract.getAllMembers();
+            } catch (contractError) {
+                throw new Error("Invalid contract address or contract not deployed");
+            }
+
+            // Check if user is a member
+            const isMemberResult = await splitterContract.isMember(address);
+            if (!isMemberResult) {
+                throw new Error("You must be a member to initiate final settlement");
+            }
+
+            // Check if there are funds to settle
+            const totalFunds = await splitterContract.totalPooledFunds();
+            if (totalFunds.eq(0)) {
+                throw new Error("No funds available for settlement");
+            }
+
+            // Execute final settlement
+            const tx = await splitterContract.finalSettlement();
+            await tx.wait();
+
+            // Refresh the splitters list
+            await loadUserSplitters();
+            
+            setShowSettlementConfirm({ ...showSettlementConfirm, [splitterAddress]: false });
+            alert("Final settlement completed successfully! All funds have been distributed to members.");
+
+        } catch (err) {
+            console.error("Final settlement error:", err);
+            setError(`Final settlement failed: ${err.message}`);
+        } finally {
+            setSettlementLoading({ ...settlementLoading, [splitterAddress]: false });
         }
     };
 
@@ -214,7 +306,29 @@ export default function Splitters({
                             {userSplitters.map((splitter, index) => (
                                 <div key={index} className="splitter-card">
                                     <div className="splitter-header">
-                                        <h3>Splitter #{index + 1}</h3>
+                                        {editingName[splitter.address] ? (
+                                            <input
+                                                type="text"
+                                                className="editable-name-input"
+                                                defaultValue={splitterNames[splitter.address] || `Splitter #${index + 1}`}
+                                                onBlur={(e) => handleNameEdit(splitter.address, e.target.value)}
+                                                onKeyPress={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleNameEdit(splitter.address, e.target.value);
+                                                    }
+                                                }}
+                                                autoFocus
+                                            />
+                                        ) : (
+                                            <h3 
+                                                className="editable-name"
+                                                onClick={() => setEditingName({ ...editingName, [splitter.address]: true })}
+                                                title="Click to edit name"
+                                            >
+                                                {splitterNames[splitter.address] || `Splitter #${index + 1}`}
+                                                <span className="edit-icon">✏️</span>
+                                            </h3>
+                                        )}
                                         <span className="splitter-date">
                                             Created: {formatDate(splitter.createdAt)}
                                         </span>
@@ -244,12 +358,50 @@ export default function Splitters({
                                         </div>
                                     </div>
                                     
-                                    <button 
-                                        onClick={() => handleSelectSplitter(splitter.address)}
-                                        className="button button-primary"
-                                    >
-                                        Open Splitter
-                                    </button>
+                                    <div className="splitter-actions">
+                                        <button 
+                                            onClick={() => handleSelectSplitter(splitter.address)}
+                                            className="button button-primary"
+                                        >
+                                            Open Splitter
+                                        </button>
+                                        
+                                        {splitter.creator && splitter.creator.toLowerCase() === address.toLowerCase() && (
+                                            <button 
+                                                onClick={() => setShowSettlementConfirm({ ...showSettlementConfirm, [splitter.address]: true })}
+                                                className="button button-danger"
+                                                disabled={settlementLoading[splitter.address]}
+                                            >
+                                                {settlementLoading[splitter.address] ? 'Settling...' : '⚠️ Final Settlement'}
+                                            </button>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Final Settlement Confirmation Modal */}
+                                    {showSettlementConfirm[splitter.address] && (
+                                        <div className="settlement-modal">
+                                            <div className="settlement-modal-content">
+                                                <h3>⚠️ Final Settlement</h3>
+                                                <p>This will distribute all remaining funds to group members and effectively close this splitter.</p>
+                                                <p><strong>This action cannot be undone!</strong></p>
+                                                <div className="settlement-actions">
+                                                    <button 
+                                                        onClick={() => handleFinalSettlement(splitter.address)}
+                                                        className="button button-danger"
+                                                        disabled={settlementLoading[splitter.address]}
+                                                    >
+                                                        {settlementLoading[splitter.address] ? 'Processing...' : 'Confirm Settlement'}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => setShowSettlementConfirm({ ...showSettlementConfirm, [splitter.address]: false })}
+                                                        className="button button-secondary"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
